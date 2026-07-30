@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Калькулятор запаса хода и моточасов</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="manifest" href="manifest.json" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap"
+			rel="stylesheet"
+		/>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+	</head>
+	<body>
+		<header class="app-header">
+			<div class="header-container">
+				<div class="logo">
+					<span class="logo-icon">⛽</span
+					><span class="logo-text">Fuel<span>Calc</span></span>
+				</div>
+				<div class="auth-controls">
+					<button
+						id="oilModalBtn"
+						class="btn-outline oil-btn"
+						title="Расчёт замены масла"
+					>
+						🛢️
+					</button>
+					<button id="themeToggle" class="btn-outline theme-btn">🌙</button>
+					<div id="authButtons" class="auth-buttons">
+						<button id="loginBtn" class="btn-outline">Войти</button>
+						<button id="registerBtn" class="btn-primary">Регистрация</button>
+					</div>
+					<div id="userInfo" class="user-info" style="display: none">
+						<span class="user-name" id="userNameDisplay"></span>
+						<button id="logoutBtn" class="btn-outline logout-btn">Выйти</button>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<main class="main-content">
+			<div class="app-wrapper">
+				<!-- Графики -->
+				<section class="chart-section">
+					<div class="chart-card">
+						<h2>📈 Динамика</h2>
+						<div class="chart-group">
+							<div class="chart-label">Запас хода</div>
+							<div id="rangeChartContainer">
+								<canvas id="rangeChart"></canvas>
+							</div>
+							<div id="rangeChartEmpty" class="chart-empty show">
+								Нет данных
+							</div>
+						</div>
+						<div class="chart-group">
+							<div class="chart-label">Моточасы</div>
+							<div id="hoursChartContainer">
+								<canvas id="hoursChart"></canvas>
+							</div>
+							<div id="hoursChartEmpty" class="chart-empty show">
+								Нет данных
+							</div>
+						</div>
+						<div class="chart-group">
+							<div class="chart-label">Стоимость поездки</div>
+							<div id="costChartContainer">
+								<canvas id="costChart"></canvas>
+							</div>
+							<div id="costChartEmpty" class="chart-empty show">Нет данных</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- Калькулятор -->
+				<section class="calculator-section">
+					<div class="card">
+						<div class="card-header">
+							<span class="icon" id="modeIcon">🚗</span>
+							<h1 id="modeTitle">Запас хода</h1>
+							<p id="modeDesc">Введите данные и нажмите «Рассчитать»</p>
+						</div>
+
+						<div class="mode-toggle">
+							<button class="active" data-mode="range">Запас хода</button>
+							<button data-mode="hours">Моточасы</button>
+						</div>
+
+						<div id="rangeInputs" class="inputs">
+							<div class="input-group">
+								<label for="fuel"
+									><span class="label-icon">⛽</span> Топливо в баке</label
+								>
+								<div class="input-row">
+									<input
+										type="number"
+										id="fuel"
+										value="50"
+										step="0.5"
+										min="0"
+										placeholder="0"
+									/>
+									<span class="unit-badge" id="fuelUnit">л</span>
+								</div>
+								<div class="preset-hint">
+									<button data-fuel="20">20</button
+									><button data-fuel="40">40</button>
+									<button data-fuel="50">50</button
+									><button data-fuel="60">60</button>
+									<button data-fuel="80">80</button>
+								</div>
+							</div>
+							<div class="input-group">
+								<label for="consumption"
+									><span class="label-icon">📊</span> Расход топлива</label
+								>
+								<div class="input-row">
+									<input
+										type="number"
+										id="consumption"
+										value="7.5"
+										step="0.1"
+										min="0.1"
+										placeholder="0"
+									/>
+									<span class="unit-badge" id="consumptionUnit">л/100 км</span>
+								</div>
+								<div class="preset-hint">
+									<button data-consumption="5">5</button
+									><button data-consumption="7.5">7.5</button>
+									<button data-consumption="10">10</button
+									><button data-consumption="12">12</button>
+									<button data-consumption="15">15</button>
+								</div>
+							</div>
+							<div class="unit-toggle">
+								<button class="active" data-unit="metric">Метрическая</button>
+								<button data-unit="imperial">Имперская</button>
+							</div>
+							<div class="extra-fields">
+								<div class="input-group">
+									<label for="fuelPrice"
+										><span class="label-icon">💰</span> Цена топлива (за
+										ед.)</label
+									>
+									<div class="input-row">
+										<input
+											type="number"
+											id="fuelPrice"
+											value="55"
+											step="0.1"
+											min="0"
+											placeholder="0"
+										/>
+										<span class="unit-badge" id="priceUnit">₽/л</span>
+									</div>
+									<div class="preset-hint">
+										<button data-price="45">45</button
+										><button data-price="55">55</button>
+										<button data-price="65">65</button
+										><button data-price="75">75</button>
+									</div>
+								</div>
+								<div class="input-group">
+									<label for="travelSpeed"
+										><span class="label-icon">🚀</span> Скорость поездки
+										(км/ч)</label
+									>
+									<div class="input-row">
+										<input
+											type="number"
+											id="travelSpeed"
+											value="90"
+											step="5"
+											min="1"
+											placeholder="0"
+										/>
+										<span class="unit-badge">км/ч</span>
+									</div>
+									<div class="preset-hint">
+										<button data-speed-travel="60">60</button
+										><button data-speed-travel="90">90</button>
+										<button data-speed-travel="110">110</button
+										><button data-speed-travel="130">130</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div id="hoursInputs" class="inputs" style="display: none">
+							<div class="input-group">
+								<label for="mileage"
+									><span class="label-icon">🛣️</span> Пробег (км)</label
+								>
+								<div class="input-row">
+									<input
+										type="number"
+										id="mileage"
+										value="1000"
+										step="10"
+										min="0"
+										placeholder="0"
+									/>
+									<span class="unit-badge">км</span>
+								</div>
+								<div class="preset-hint">
+									<button data-mileage="500">500</button
+									><button data-mileage="1000">1000</button>
+									<button data-mileage="5000">5000</button
+									><button data-mileage="10000">10000</button>
+								</div>
+							</div>
+							<div class="input-group">
+								<label for="avgSpeed"
+									><span class="label-icon">⚡</span> Средняя скорость
+									(км/ч)</label
+								>
+								<div class="input-row">
+									<input
+										type="number"
+										id="avgSpeed"
+										value="60"
+										step="1"
+										min="1"
+										placeholder="0"
+									/>
+									<span class="unit-badge">км/ч</span>
+								</div>
+								<div class="preset-hint">
+									<button data-speed="30">30</button
+									><button data-speed="50">50</button>
+									<button data-speed="60">60</button
+									><button data-speed="80">80</button>
+									<button data-speed="100">100</button>
+								</div>
+							</div>
+							<div class="extra-fields">
+								<div class="input-group">
+									<label for="hourlyRate"
+										><span class="label-icon">💰</span> Стоимость часа работы
+										(₽/ч)</label
+									>
+									<div class="input-row">
+										<input
+											type="number"
+											id="hourlyRate"
+											value="500"
+											step="10"
+											min="0"
+											placeholder="0"
+										/>
+										<span class="unit-badge">₽/ч</span>
+									</div>
+									<div class="preset-hint">
+										<button data-hourly="300">300</button
+										><button data-hourly="500">500</button>
+										<button data-hourly="800">800</button
+										><button data-hourly="1000">1000</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<button id="calculateBtn" class="btn-primary calculate-btn">
+							Рассчитать
+						</button>
+
+						<div class="result" id="resultContainer">
+							<div class="result-icon">🚗</div>
+							<div class="result-number-wrap">
+								<span class="result-number" id="resultNumber">—</span>
+								<span class="result-unit" id="resultUnit">км</span>
+							</div>
+							<div class="result-label" id="resultLabel">
+								Нажмите «Рассчитать»
+							</div>
+							<div class="result-sub" id="resultSub"></div>
+							<div
+								id="extraResults"
+								class="extra-results"
+								style="display: none"
+							>
+								<div class="extra-item">
+									<span class="extra-label">💰 Стоимость</span>
+									<span class="extra-value cost" id="costValue">—</span>
+								</div>
+								<div class="extra-item">
+									<span class="extra-label">⏱️ Время в пути</span>
+									<span class="extra-value time" id="timeValue">—</span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+
+				<!-- История -->
+				<aside class="history-section">
+					<div class="history-card">
+						<h2>👤 Личный кабинет</h2>
+						<div id="userProfile" style="display: none">
+							<div class="profile-field">
+								<span class="profile-label">Логин</span
+								><span class="profile-value" id="profileLogin">—</span>
+							</div>
+							<div class="profile-field">
+								<span class="profile-label">Пароль</span
+								><span class="profile-value" id="profilePassword">—</span>
+							</div>
+						</div>
+						<div id="noAuthMessage" class="no-auth-message">
+							<span>🔒</span>
+							<p>Войдите, чтобы видеть историю</p>
+						</div>
+						<div class="history-header">
+							<span>📋 История расчётов</span>
+							<span class="history-count">последние 5</span>
+						</div>
+						<div class="history-actions">
+							<button id="exportCSV" class="btn-outline export-btn">
+								📥 CSV
+							</button>
+							<button id="exportJSON" class="btn-outline export-btn">
+								📥 JSON
+							</button>
+						</div>
+						<div id="historyList" class="history-list">
+							<div class="history-empty">Нет записей</div>
+						</div>
+					</div>
+				</aside>
+			</div>
+		</main>
+
+		<!-- Модалки -->
+		<div id="loginModal" class="modal">
+			<div class="modal-content">
+				<span class="close-modal" id="closeLogin">&times;</span>
+				<h2>Вход в систему</h2>
+				<form id="loginForm">
+					<div class="form-group">
+						<label>Логин</label
+						><input
+							type="text"
+							id="loginUsername"
+							placeholder="Введите логин"
+							required
+						/>
+					</div>
+					<div class="form-group">
+						<label>Пароль</label
+						><input
+							type="password"
+							id="loginPassword"
+							placeholder="Введите пароль"
+							required
+						/>
+					</div>
+					<button type="submit" class="btn-primary full-width">Войти</button>
+					<p class="form-switch">
+						Нет аккаунта?
+						<a href="#" id="switchToRegister">Зарегистрироваться</a>
+					</p>
+				</form>
+			</div>
+		</div>
+
+		<div id="registerModal" class="modal">
+			<div class="modal-content">
+				<span class="close-modal" id="closeRegister">&times;</span>
+				<h2>Регистрация</h2>
+				<form id="registerForm">
+					<div class="form-group">
+						<label>Логин</label
+						><input
+							type="text"
+							id="regUsername"
+							placeholder="Придумайте логин"
+							required
+						/>
+					</div>
+					<div class="form-group">
+						<label>Пароль</label
+						><input
+							type="password"
+							id="regPassword"
+							placeholder="Придумайте пароль"
+							required
+						/>
+					</div>
+					<div class="form-group">
+						<label>Подтверждение</label
+						><input
+							type="password"
+							id="regPasswordConfirm"
+							placeholder="Повторите пароль"
+							required
+						/>
+					</div>
+					<button type="submit" class="btn-primary full-width">
+						Зарегистрироваться
+					</button>
+					<p class="form-switch">
+						Уже есть аккаунт? <a href="#" id="switchToLogin">Войти</a>
+					</p>
+				</form>
+			</div>
+		</div>
+
+		<div id="oilModal" class="modal">
+			<div class="modal-content oil-modal">
+				<span class="close-modal" id="closeOil">&times;</span>
+				<h2>🛢️ Расчёт замены масла</h2>
+				<p class="oil-desc">
+					Расчёт пробега до замены масла по моточасам (предел 250 мч)
+				</p>
+				<div class="oil-inputs">
+					<div class="input-group">
+						<label for="oilPrevMileage"
+							><span class="label-icon">🔄</span> Пробег при последней замене
+							(км)</label
+						>
+						<div class="input-row">
+							<input
+								type="number"
+								id="oilPrevMileage"
+								value="5000"
+								step="100"
+								min="0"
+								placeholder="0"
+							/>
+							<span class="unit-badge">км</span>
+						</div>
+						<div class="preset-hint">
+							<button data-oil-prev="0">0 (новая)</button>
+							<button data-oil-prev="5000">5 000</button>
+							<button data-oil-prev="10000">10 000</button>
+							<button data-oil-prev="15000">15 000</button>
+						</div>
+					</div>
+					<div class="input-group">
+						<label for="oilCurrentMileage"
+							><span class="label-icon">🛣️</span> Текущий пробег (км)</label
+						>
+						<div class="input-row">
+							<input
+								type="number"
+								id="oilCurrentMileage"
+								value="15000"
+								step="100"
+								min="0"
+								placeholder="0"
+							/>
+							<span class="unit-badge">км</span>
+						</div>
+						<div class="preset-hint">
+							<button data-oil-current="10000">10 000</button>
+							<button data-oil-current="15000">15 000</button>
+							<button data-oil-current="20000">20 000</button>
+							<button data-oil-current="30000">30 000</button>
+						</div>
+					</div>
+					<div class="input-group">
+						<label for="oilSpeed"
+							><span class="label-icon">⚡</span> Средняя скорость (км/ч)</label
+						>
+						<div class="input-row">
+							<input
+								type="number"
+								id="oilSpeed"
+								value="50"
+								step="1"
+								min="1"
+								placeholder="0"
+							/>
+							<span class="unit-badge">км/ч</span>
+						</div>
+						<div class="preset-hint">
+							<button data-oil-speed="30">30</button>
+							<button data-oil-speed="50">50</button>
+							<button data-oil-speed="70">70</button>
+							<button data-oil-speed="90">90</button>
+						</div>
+					</div>
+					<div class="input-group">
+						<label for="oilLimit"
+							><span class="label-icon">⏱️</span> Предел моточасов (мч)</label
+						>
+						<div class="input-row">
+							<input
+								type="number"
+								id="oilLimit"
+								value="250"
+								step="10"
+								min="10"
+								placeholder="0"
+							/>
+							<span class="unit-badge">мч</span>
+						</div>
+						<div class="preset-hint">
+							<button data-oil-limit="200">200</button>
+							<button data-oil-limit="250">250</button>
+							<button data-oil-limit="300">300</button>
+							<button data-oil-limit="400">400</button>
+						</div>
+					</div>
+				</div>
+				<button id="oilCalculateBtn" class="btn-primary calculate-btn">
+					Рассчитать замену масла
+				</button>
+				<div class="oil-result" id="oilResultContainer">
+					<div class="oil-result-icon">🛢️</div>
+					<div class="oil-result-number-wrap">
+						<span class="oil-result-number" id="oilResultNumber">—</span>
+						<span class="oil-result-unit" id="oilResultUnit">км</span>
+					</div>
+					<div class="oil-result-label" id="oilResultLabel">
+						Введите данные и нажмите «Рассчитать»
+					</div>
+					<div class="oil-result-sub" id="oilResultSub"></div>
+					<div class="oil-result-status" id="oilResultStatus"></div>
+				</div>
+			</div>
+		</div>
+
+		<script src="script.js"></script>
+		<script>
+			if ('serviceWorker' in navigator) {
+				navigator.serviceWorker.register('sw.js')
+			}
+		</script>
+	</body>
+</html>
