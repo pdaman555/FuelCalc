@@ -20,6 +20,23 @@
       "purpose": "any"
     }
   ],
+"screenshots": [
+    {
+      "src": "screenshot-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Главный экран калькулятора"
+    },
+    {
+      "src": "screenshot-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "История расчётов"
+    }
+  ]
+}
   "id": "FuelCalc",
   "categories": [
     "books &amp; reference",
