@@ -4,7 +4,8 @@
   "description": "Расчёт запаса хода, моточасов и замены масла.",
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#ededed",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
   "theme_color": "#f9b800",
   "icons": [
     {
@@ -20,7 +21,7 @@
       "purpose": "any"
     }
   ],
-"screenshots": [
+  "screenshots": [
     {
       "src": "screenshot-1.png",
       "sizes": "1080x1920",
@@ -35,11 +36,10 @@
       "form_factor": "wide",
       "label": "История расчётов"
     }
-  ]
-}
+  ],
   "id": "FuelCalc",
   "categories": [
-    "books &amp; reference",
+    "books & reference",
     "cars",
     "entertainment",
     "events",
